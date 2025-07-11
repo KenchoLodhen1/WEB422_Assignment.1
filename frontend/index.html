@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-book"></i> Library Management System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showSection('books')">Books</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('transactions')">Transactions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('borrow')">Borrow/Return</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
+        <!-- Books Section -->
+        <div id="booksSection" class="section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Books Management</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookModal" onclick="clearBookForm()">
+                    <i class="fas fa-plus"></i> Add New Book
+                </button>
+            </div>
+
+            <!-- Books Table -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>ISBN</th>
+                            <th>Genre</th>
+                            <th>Available/Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksTableBody">
+                        <!-- Books will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Transactions Section -->
+        <div id="transactionsSection" class="section" style="display: none;">
+            <h2>Transaction History</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Book</th>
+                            <th>Borrower</th>
+                            <th>Borrow Date</th>
+                            <th>Due Date</th>
+                            <th>Return Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTableBody">
+                        <!-- Transactions will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Borrow/Return Section -->
+        <div id="borrowSection" class="section" style="display: none;">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Borrow Book</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="borrowForm">
+                                <div class="mb-3">
+                                    <label for="borrowBookSelect" class="form-label">Select Book</label>
+                                    <select class="form-select" id="borrowBookSelect" required>
+                                        <option value="">Choose a book...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="borrowerName" class="form-label">Borrower Name</label>
+                                    <input type="text" class="form-control" id="borrowerName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="borrowerEmail" class="form-label">Borrower Email</label>
+                                    <input type="email" class="form-control" id="borrowerEmail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="borrowDays" class="form-label">Borrow Days</label>
+                                    <input type="number" class="form-control" id="borrowDays" value="14" min="1" max="30" required>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-book-reader"></i> Borrow Book
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Return Book</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="returnForm">
+                                <div class="mb-3">
+                                    <label for="returnEmail" class="form-label">Your Email</label>
+                                    <input type="email" class="form-control" id="returnEmail" required>
+                                </div>
+                                <button type="button" class="btn btn-info" onclick="loadUserBooks()">
+                                    <i class="fas fa-search"></i> Find My Books
+                                </button>
+                            </form>
+                            <div id="userBooksContainer" class="mt-3" style="display: none;">
+                                <h6>Your Borrowed Books:</h6>
+                                <div id="userBooksList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Modal -->
+    <div class="modal fade" id="bookModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bookModalTitle">Add New Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookForm">
+                        <input type="hidden" id="bookId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bookTitle" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="bookTitle" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bookAuthor" class="form-label">Author</label>
+                                    <input type="text" class="form-control" id="bookAuthor" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bookIsbn" class="form-label">ISBN</label>
+                                    <input type="text" class="form-control" id="bookIsbn" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bookGenre" class="form-label">Genre</label>
+                                    <input type="text" class="form-control" id="bookGenre" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bookYear" class="form-label">Published Year</label>
+                                    <input type="number" class="form-control" id="bookYear" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="bookCopies" class="form-label">Total Copies</label>
+                                    <input type="number" class="form-control" id="bookCopies" min="1" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bookDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="bookDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBook()">Save Book</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
